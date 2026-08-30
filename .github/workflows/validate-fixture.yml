@@ -1,0 +1,22 @@
+name: Validate fixture
+
+on:
+  pull_request:
+    paths:
+      - fixtures/contribution.json
+  push:
+    branches:
+      - main
+    paths:
+      - fixtures/contribution.json
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate contribution JSON
+        run: node -e 'JSON.parse(require("node:fs").readFileSync("fixtures/contribution.json", "utf8"))'
