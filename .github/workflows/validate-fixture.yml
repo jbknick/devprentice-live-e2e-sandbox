@@ -2,13 +2,9 @@ name: Validate fixture
 
 on:
   pull_request:
-    paths:
-      - fixtures/contribution.json
   push:
     branches:
       - main
-    paths:
-      - fixtures/contribution.json
 
 permissions:
   contents: read
@@ -16,7 +12,16 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
-      - name: Validate contribution JSON
-        run: node -e 'JSON.parse(require("node:fs").readFileSync("fixtures/contribution.json", "utf8"))'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Test fixture validation
+        run: node --test .github/scripts/validate-fixture.test.mjs
+      - name: Validate fixture and changed documentation
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: node .github/scripts/validate-fixture.mjs
